@@ -129,7 +129,10 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             The predicted labels (y_pred) for given X.
         """
-        pass
+        #if not self.loss_hist_train:
+        #    raise AssertionError("train first before predicting") #commenting because using in grad func
+        mult = np.matmul(X, self.W)
+        return 1 / (1 + np.exp(-mult))
     
     def loss_function(self, y_true, y_pred) -> float:
         """
@@ -143,7 +146,20 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             The mean loss (a single number).
         """
-        pass
+        if len(y_true) != len(y_pred):
+            raise ValueError("predictions and truths do not have the same length")
+        
+        #−(𝑦log(𝑝)+(1−𝑦)log(1−𝑝))
+        l_sum = 0
+        N = len(y_pred)
+        for i in range(N):
+            p_i = y_pred[i]
+            y_i = y_true[i]
+            logp = np.log10(p_i)
+            logminp = np.log10(1 - p_i)
+            l_sum += y_i * logp + (1 - y_i) * logminp
+        loss = -1/N * l_sum
+        return loss
         
     def calculate_gradient(self, y_true, X) -> np.ndarray:
         """
@@ -157,4 +173,9 @@ class LogisticRegressor(BaseRegressor):
         Returns: 
             Vector of gradients.
         """
-        pass
+
+        # derivative of cross entropy loss is (y_hat - y)X
+        y_pred = self.make_prediction(X)
+        #mult = np.matmul((y_pred - y_true), X)
+        mult = np.matmul((y_pred - y_true), X)
+        return mult/len(y_true)
