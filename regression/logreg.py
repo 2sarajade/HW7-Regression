@@ -149,14 +149,13 @@ class LogisticRegressor(BaseRegressor):
         if len(y_true) != len(y_pred):
             raise ValueError("predictions and truths do not have the same length")
         
-        #−(𝑦log(𝑝)+(1−𝑦)log(1−𝑝))
         l_sum = 0
         N = len(y_pred)
         for i in range(N):
             p_i = y_pred[i]
             y_i = y_true[i]
-            logp = np.log10(p_i)
-            logminp = np.log10(1 - p_i)
+            logp = np.log(p_i)
+            logminp = np.log(1 - p_i)
             l_sum += y_i * logp + (1 - y_i) * logminp
         loss = -1/N * l_sum
         return loss
@@ -176,6 +175,5 @@ class LogisticRegressor(BaseRegressor):
 
         # derivative of cross entropy loss is (y_hat - y)X
         y_pred = self.make_prediction(X)
-        #mult = np.matmul((y_pred - y_true), X)
-        mult = np.matmul((y_pred - y_true), X)
+        mult = np.dot((y_pred - y_true), X)
         return mult/len(y_true)
